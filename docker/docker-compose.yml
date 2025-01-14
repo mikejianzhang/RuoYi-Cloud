@@ -1,3 +1,4 @@
+name: ruoyi-cloud
 services:
   ruoyi-dbgate:
     image: dbgate/dbgate:5.5.4 # https://dbgate.org/docs/env-variables/
@@ -59,7 +60,9 @@ services:
       timeout: 10s
       retries: 10
     depends_on:
-      - ruoyi-mysql
+      ruoyi-mysql:
+        condition: service_healthy
+        restart: true
 
     networks:
       - atool-net-ruoyi
@@ -79,6 +82,11 @@ services:
       context: ./mysql
     #ports:
     #  - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
     volumes:
       - ./mysql/conf:/etc/mysql/conf.d
       - ./mysql/logs:/logs
@@ -112,6 +120,11 @@ services:
       context: ./redis
     #ports:
     #  - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
     volumes:
       - ./redis/conf/redis.conf:/home/ruoyi/redis/redis.conf
       - ./redis/data:/data
@@ -163,8 +176,12 @@ services:
       SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
     depends_on:
-      - ruoyi-redis
-      - ruoyi-nacos
+      ruoyi-redis:
+        condition: service_healthy
+        restart: true
+      ruoyi-nacos:
+        condition: service_healthy
+        restart: true
 
     networks:
       - atool-net-ruoyi
@@ -176,8 +193,16 @@ services:
       dockerfile: dockerfile
     #ports:
     #  - "9200:9200"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
     depends_on:
-      - ruoyi-redis
+      ruoyi-redis:
+        condition: service_healthy
+        restart: true
+      ruoyi-nacos:
+        condition: service_healthy
+        restart: true
 
     networks:
       - atool-net-ruoyi
@@ -189,9 +214,19 @@ services:
       dockerfile: dockerfile
     #ports:
     #  - "9201:9201"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
     depends_on:
-      - ruoyi-redis
-      - ruoyi-mysql
+      ruoyi-redis:
+        condition: service_healthy
+        restart: true
+      ruoyi-mysql:
+        condition: service_healthy
+        restart: true
+      ruoyi-nacos:
+        condition: service_healthy
+        restart: true
 
     networks:
       - atool-net-ruoyi
@@ -203,8 +238,16 @@ services:
       dockerfile: dockerfile
     #ports:
     #  - "9202:9202"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
     depends_on:
-      - ruoyi-mysql
+      ruoyi-mysql:
+        condition: service_healthy
+        restart: true
+      ruoyi-nacos:
+        condition: service_healthy
+        restart: true
 
     networks:
       - atool-net-ruoyi
@@ -216,8 +259,16 @@ services:
       dockerfile: dockerfile
     #ports:
     #  - "9203:9203"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
     depends_on:
-      - ruoyi-mysql
+      ruoyi-mysql:
+        condition: service_healthy
+        restart: true
+      ruoyi-nacos:
+        condition: service_healthy
+        restart: true
 
     networks:
       - atool-net-ruoyi
@@ -229,6 +280,13 @@ services:
       dockerfile: dockerfile
     #ports:
     #  - "9300:9300"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
+    depends_on:
+      ruoyi-nacos:
+        condition: service_healthy
+        restart: true
     volumes:
     - ./ruoyi/uploadPath:/home/ruoyi/uploadPath
 
@@ -242,6 +300,13 @@ services:
       dockerfile: dockerfile
     ports:
       - "9100:9100"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
+    depends_on:
+      ruoyi-nacos:
+        condition: service_healthy
+        restart: true
 
     networks:
       - atool-net-ruoyi
