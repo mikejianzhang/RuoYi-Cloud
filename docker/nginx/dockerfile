@@ -1,7 +1,7 @@
 # 基础镜像
 FROM nginx
 # author
-MAINTAINER ruoyi
+LABEL org.opencontainers.image.authors="ruoyi"
 
 # 挂载目录
 VOLUME /home/ruoyi/projects/ruoyi-ui

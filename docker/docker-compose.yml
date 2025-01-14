@@ -1,8 +1,47 @@
-version : '3.8'
 services:
+  ruoyi-dbgate:
+    image: dbgate/dbgate:5.5.4 # https://dbgate.org/docs/env-variables/
+    container_name: ruoyi-dbgate
+    restart: unless-stopped
+    environment:
+      WEB_ROOT: /dbadmin
+      LOGIN: admin
+      PASSWORD: admin888
+
+      CONNECTIONS: mysql,redis
+  
+      LABEL_mysql: ruoyi-mysql
+      SERVER_mysql: ruoyi-mysql
+      USER_mysql: root
+      PASSWORD_mysql: root888
+      PORT_mysql: 3306
+      ENGINE_mysql: mysql@dbgate-plugin-mysql
+
+      LABEL_redis: ruoyi-redis
+      SERVER_redis: ruoyi-redis
+      PORT_redis: 6379
+      ENGINE_redis: redis@dbgate-plugin-redis
+
+    volumes:
+      - ~/Documents/MikeCodingWorks/MyContainers/dbgate/data:/root/.dbgate
+    depends_on:
+
+      - ruoyi-mysql
+      - ruoyi-redis
+
+    networks:
+      - atool-net-ruoyi
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ruoyi-dbgate.rule=Host(`ruoyi.atool.localhost`)"
+      - "traefik.http.routers.ruoyi-dbgate.rule=PathPrefix(`/dbadmin`)"
+      - "traefik.http.routers.ruoyi-dbgate.entrypoints=web"
+      - “traefik.http.routers.ruoyi-dbgate.service=ruoyi-dbgate”
+      - "traefik.http.services.ruoyi-dbgate.loadbalancer.server.port=3000"
+
   ruoyi-nacos:
     container_name: ruoyi-nacos
-    image: nacos/nacos-server
     build:
       context: ./nacos
     environment:
@@ -10,19 +49,36 @@ services:
     volumes:
       - ./nacos/logs/:/home/nacos/logs
       - ./nacos/conf/application.properties:/home/nacos/conf/application.properties
-    ports:
-      - "8848:8848"
-      - "9848:9848"
-      - "9849:9849"
+    #ports:
+    #  - "8848:8848"
+    #  - "9848:9848"
+    #  - "9849:9849"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ruoyi-nacos:8848/nacos/v1/console/health/readiness"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
     depends_on:
       - ruoyi-mysql
+
+    networks:
+      - atool-net-ruoyi
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ruoyi-nacos.rule=Host(`ruoyi.atool.localhost`)"
+      - "traefik.http.routers.ruoyi-nacos.rule=PathPrefix(`/nacos`)"
+      - "traefik.http.routers.ruoyi-nacos.entrypoints=web"
+      - “traefik.http.routers.ruoyi-nacos.service=ruoyi-nacos”
+      - "traefik.http.services.ruoyi-nacos.loadbalancer.server.port=8848"
+
   ruoyi-mysql:
+    platform: linux/x86_64
     container_name: ruoyi-mysql
-    image: mysql:5.7
     build:
       context: ./mysql
-    ports:
-      - "3306:3306"
+    #ports:
+    #  - "3306:3306"
     volumes:
       - ./mysql/conf:/etc/mysql/conf.d
       - ./mysql/logs:/logs
@@ -37,25 +93,46 @@ services:
         ]
     environment:
       MYSQL_DATABASE: 'ry-cloud'
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root888
+      MYSQL_ROOT_HOST: '%'
+
+    networks:
+      - atool-net-ruoyi
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.ruoyi-mysql.entrypoints=mysql"
+      - "traefik.tcp.routers.ruoyi-mysql.rule=HostSNI(`ruoyi.atool.localhost`)"
+      - "traefik.tcp.routers.ruoyi-mysql.service=ruoyi-mysql"
+      - "traefik.tcp.services.ruoyi-mysql.loadbalancer.server.port=3306"
+
   ruoyi-redis:
     container_name: ruoyi-redis
-    image: redis
     build:
       context: ./redis
-    ports:
-      - "6379:6379"
+    #ports:
+    #  - "6379:6379"
     volumes:
       - ./redis/conf/redis.conf:/home/ruoyi/redis/redis.conf
       - ./redis/data:/data
     command: redis-server /home/ruoyi/redis/redis.conf
+
+    networks:
+      - atool-net-ruoyi
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.ruoyi-redis.entrypoints=redis"
+      - "traefik.tcp.routers.ruoyi-redis.rule=HostSNI(`ruoyi.atool.localhost`)"
+      - "traefik.tcp.routers.ruoyi-redis.service=ruoyi-redis"
+      - "traefik.tcp.services.ruoyi-redis.loadbalancer.server.port=6379"
+
   ruoyi-nginx:
     container_name: ruoyi-nginx
-    image: nginx
     build:
       context: ./nginx
-    ports:
-      - "80:80"
+    #ports:
+    #  - "80:80"
     volumes:
       - ./nginx/html/dist:/home/ruoyi/projects/ruoyi-ui
       - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
@@ -63,74 +140,101 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - ruoyi-gateway
-    links:
-      - ruoyi-gateway
+
+    networks:
+      - atool-net-ruoyi
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ruoyi-nginx.rule=Host(`ruoyi.atool.localhost`)"
+      - "traefik.http.routers.ruoyi-nginx.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.ruoyi-nginx.entrypoints=web"
+      - “traefik.http.routers.ruoyi-nginx.service=ruoyi-nginx”
+      - "traefik.http.services.ruoyi-nginx.loadbalancer.server.port=80"
+
   ruoyi-gateway:
     container_name: ruoyi-gateway
     build:
       context: ./ruoyi/gateway
       dockerfile: dockerfile
-    ports:
-      - "8080:8080"
+    #ports:
+    #  - "8080:8080"
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
     depends_on:
       - ruoyi-redis
-    links:
-      - ruoyi-redis
+      - ruoyi-nacos
+
+    networks:
+      - atool-net-ruoyi
+
   ruoyi-auth:
     container_name: ruoyi-auth
     build:
       context: ./ruoyi/auth
       dockerfile: dockerfile
-    ports:
-      - "9200:9200"
+    #ports:
+    #  - "9200:9200"
     depends_on:
       - ruoyi-redis
-    links:
-      - ruoyi-redis
+
+    networks:
+      - atool-net-ruoyi
+
   ruoyi-modules-system:
     container_name: ruoyi-modules-system
     build:
       context: ./ruoyi/modules/system
       dockerfile: dockerfile
-    ports:
-      - "9201:9201"
+    #ports:
+    #  - "9201:9201"
     depends_on:
       - ruoyi-redis
       - ruoyi-mysql
-    links:
-      - ruoyi-redis
-      - ruoyi-mysql
+
+    networks:
+      - atool-net-ruoyi
+
   ruoyi-modules-gen:
     container_name: ruoyi-modules-gen
     build:
       context: ./ruoyi/modules/gen
       dockerfile: dockerfile
-    ports:
-      - "9202:9202"
+    #ports:
+    #  - "9202:9202"
     depends_on:
       - ruoyi-mysql
-    links:
-      - ruoyi-mysql
+
+    networks:
+      - atool-net-ruoyi
+
   ruoyi-modules-job:
     container_name: ruoyi-modules-job
     build:
       context: ./ruoyi/modules/job
       dockerfile: dockerfile
-    ports:
-      - "9203:9203"
+    #ports:
+    #  - "9203:9203"
     depends_on:
       - ruoyi-mysql
-    links:
-      - ruoyi-mysql
+
+    networks:
+      - atool-net-ruoyi
+
   ruoyi-modules-file:
     container_name: ruoyi-modules-file
     build:
       context: ./ruoyi/modules/file
       dockerfile: dockerfile
-    ports:
-      - "9300:9300"
+    #ports:
+    #  - "9300:9300"
     volumes:
     - ./ruoyi/uploadPath:/home/ruoyi/uploadPath
+
+    networks:
+      - atool-net-ruoyi
+
   ruoyi-visual-monitor:
     container_name: ruoyi-visual-monitor
     build:
@@ -138,3 +242,11 @@ services:
       dockerfile: dockerfile
     ports:
       - "9100:9100"
+
+    networks:
+      - atool-net-ruoyi
+
+networks:
+  atool-net-ruoyi:
+    name: atool-net-ruoyi
+    external: true
