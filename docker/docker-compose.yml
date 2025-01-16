@@ -298,8 +298,8 @@ services:
     build:
       context: ./ruoyi/visual/monitor
       dockerfile: dockerfile
-    ports:
-      - "9100:9100"
+    #ports:
+    # - "9100:9100"
     environment:
       SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
@@ -310,6 +310,35 @@ services:
 
     networks:
       - atool-net-ruoyi
+
+    labels:
+      # Enable managing of this service through Traefik
+      - traefik.enable=true
+      - "traefik.http.routers.ruoyi-visual-monitor.entrypoints=web"
+
+      # Configure router to have /pihole route to port 80 internally
+      - "traefik.http.routers.ruoyi-visual-monitor.rule=Host(`monitor.ruoyi.atool.localhost`)"
+      - “traefik.http.routers.ruoyi-visual-monitor.service=ruoyi-visual-monitor”
+      - "traefik.http.services.ruoyi-visual-monitor.loadbalancer.server.port=9100"
+
+      # Fix incorrect redirects to loop back to PathPrefix rule
+      # Depends on: https://plugins.traefik.io/plugins/628c9eb5108ecc83915d7758/rewrite-header
+      #- "traefik.http.middlewares.sbadmin-force-slash.plugin.rewriteHeaders.rewrites[0].header=Location"
+      #- "traefik.http.middlewares.sbadmin-force-slash.plugin.rewriteHeaders.rewrites[0].regex=^(.*)/(.*)"
+      #- "traefik.http.middlewares.sbadmin-force-slash.plugin.rewriteHeaders.rewrites[0].replacement=$$1/sbadmin/$$2"
+
+    #  - "traefik.http.middlewares.sbadmin-redirect.redirectregex.regex=^(.*)/(.*)"
+    #  - "traefik.http.middlewares.sbadmin-redirect.redirectregex.replacement=$${1}/sbadmin/$${2}"
+
+      # Make sure traffic ends up at / internally
+    #  - "traefik.http.middlewares.sbadmin-replace.replacepathregex.regex=^/sbadmin/(.*)"
+    #  - "traefik.http.middlewares.sbadmin-replace.replacepathregex.replacement=/$$1"
+
+      # Allow framing for displaying API token
+    #  - "traefik.http.middlewares.sbadmin-allow-framing.headers.customFrameOptionsValue=SAMEORIGIN"
+
+      # Enable middlewares
+    #  - "traefik.http.routers.ruoyi-visual-monitor.middlewares=sbadmin-replace,sbadmin-redirect,sbadmin-allow-framing"
 
 networks:
   atool-net-ruoyi:
