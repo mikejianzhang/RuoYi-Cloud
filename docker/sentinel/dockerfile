@@ -1,0 +1,22 @@
+# 基础镜像
+FROM  openjdk:8-jre
+# author
+LABEL org.opencontainers.image.authors="ruoyi"
+
+ENV SENTINEL_SERVER_PORT="8718"
+ENV SENTINEL_DASHBOARD_SERVER_HOST="localhost"
+
+# 挂载目录
+VOLUME /home/sentinel
+
+# 创建目录
+RUN mkdir -p /home/sentinel
+# 指定路径
+WORKDIR /home/sentinel
+# 复制jar文件到路径
+COPY ./jar/sentinel-dashboard-1.8.8.jar /home/sentinel/sentinel-dashboard.jar
+
+EXPOSE ${SENTINEL_SERVER_PORT}
+
+# 启动sentinel
+ENTRYPOINT java -Dserver.port=${SENTINEL_SERVER_PORT} -Dcsp.sentinel.dashboard.server=${SENTINEL_DASHBOARD_SERVER_HOST}:${SENTINEL_SERVER_PORT} -Dproject.name=sentinel-dashboard -jar sentinel-dashboard.jar
