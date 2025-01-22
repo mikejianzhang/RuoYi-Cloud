@@ -198,8 +198,8 @@ services:
     environment:
       SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: ruoyi-nacos:8848
       SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: ruoyi-nacos:8848
-      SPRING_SENTINEL_TRANSPORT_DASHBOARD: ruoyi-sentinel:8718
-      SPRING_SENTINEL_DATASOURCE_DS1_NACOS_SERVER_ADDR: ruoyi-nacos:8848
+      SPRING_CLOUD_SENTINEL_TRANSPORT_DASHBOARD: ruoyi-sentinel:8718
+      SPRING_CLOUD_SENTINEL_DATASOURCE_DS1_NACOS_SERVER_ADDR: ruoyi-nacos:8848
     depends_on:
       ruoyi-redis:
         condition: service_healthy
