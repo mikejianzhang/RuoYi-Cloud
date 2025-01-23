@@ -3,7 +3,7 @@ services:
   ruoyi-dbgate:
     image: dbgate/dbgate:5.5.4 # https://dbgate.org/docs/env-variables/
     container_name: ruoyi-dbgate
-    restart: unless-stopped
+    restart: always
     environment:
       WEB_ROOT: /dbadmin
       LOGIN: admin
@@ -43,6 +43,7 @@ services:
 
   ruoyi-nacos:
     container_name: ruoyi-nacos
+    restart: always
     build:
       context: ./nacos
     environment:
@@ -78,6 +79,7 @@ services:
   ruoyi-mysql:
     platform: linux/x86_64
     container_name: ruoyi-mysql
+    restart: always
     build:
       context: ./mysql
     #ports:
@@ -116,6 +118,7 @@ services:
 
   ruoyi-redis:
     container_name: ruoyi-redis
+    restart: always
     build:
       context: ./redis
     #ports:
@@ -142,6 +145,7 @@ services:
 
   ruoyi-nginx:
     container_name: ruoyi-nginx
+    restart: always
     build:
       context: ./nginx
     #ports:
@@ -167,6 +171,7 @@ services:
 
   ruoyi-sentinel:
     container_name: ruoyi-sentinel
+    restart: always
     build:
       context: ./sentinel
       dockerfile: dockerfile
@@ -190,6 +195,7 @@ services:
 
   ruoyi-gateway:
     container_name: ruoyi-gateway
+    restart: always
     build:
       context: ./ruoyi/gateway
       dockerfile: dockerfile
@@ -216,6 +222,7 @@ services:
 
   ruoyi-auth:
     container_name: ruoyi-auth
+    restart: always
     build:
       context: ./ruoyi/auth
       dockerfile: dockerfile
@@ -237,6 +244,7 @@ services:
 
   ruoyi-modules-system:
     container_name: ruoyi-modules-system
+    restart: always
     build:
       context: ./ruoyi/modules/system
       dockerfile: dockerfile
@@ -261,6 +269,7 @@ services:
 
   ruoyi-modules-gen:
     container_name: ruoyi-modules-gen
+    restart: always
     build:
       context: ./ruoyi/modules/gen
       dockerfile: dockerfile
@@ -282,6 +291,7 @@ services:
 
   ruoyi-modules-job:
     container_name: ruoyi-modules-job
+    restart: always
     build:
       context: ./ruoyi/modules/job
       dockerfile: dockerfile
@@ -303,6 +313,7 @@ services:
 
   ruoyi-modules-file:
     container_name: ruoyi-modules-file
+    restart: always
     build:
       context: ./ruoyi/modules/file
       dockerfile: dockerfile
@@ -323,6 +334,7 @@ services:
 
   ruoyi-visual-monitor:
     container_name: ruoyi-visual-monitor
+    restart: always
     build:
       context: ./ruoyi/visual/monitor
       dockerfile: dockerfile
