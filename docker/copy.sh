@@ -11,6 +11,8 @@ usage() {
 echo "begin copy sql "
 cp ../sql/ry_20240629.sql ./mysql/db
 cp ../sql/ry_config_20240902.sql ./mysql/db
+cp ../sql/quartz.sql ./mysql/db
+cp ../sql/ry_seata_20210128.sql ./mysql/db
 
 # copy html
 echo "begin copy html "

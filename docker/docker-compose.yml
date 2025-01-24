@@ -35,8 +35,7 @@ services:
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ruoyi-dbgate.rule=Host(`ruoyi.atool.localhost`)"
-      - "traefik.http.routers.ruoyi-dbgate.rule=PathPrefix(`/dbadmin`)"
+      - "traefik.http.routers.ruoyi-dbgate.rule=Host(`dbgate.ruoyi.atool.localhost`)"
       - "traefik.http.routers.ruoyi-dbgate.entrypoints=web"
       - “traefik.http.routers.ruoyi-dbgate.service=ruoyi-dbgate”
       - "traefik.http.services.ruoyi-dbgate.loadbalancer.server.port=3000"
@@ -70,8 +69,7 @@ services:
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ruoyi-nacos.rule=Host(`ruoyi.atool.localhost`)"
-      - "traefik.http.routers.ruoyi-nacos.rule=PathPrefix(`/nacos`)"
+      - "traefik.http.routers.ruoyi-nacos.rule=Host(`nacos.ruoyi.atool.localhost`)"
       - "traefik.http.routers.ruoyi-nacos.entrypoints=web"
       - “traefik.http.routers.ruoyi-nacos.service=ruoyi-nacos”
       - "traefik.http.services.ruoyi-nacos.loadbalancer.server.port=8848"
@@ -85,7 +83,7 @@ services:
     #ports:
     #  - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot888"]
       interval: 10s
       timeout: 10s
       retries: 10
@@ -219,6 +217,13 @@ services:
 
     networks:
       - atool-net-ruoyi
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ruoyi-gateway.rule=Host(`gateway.ruoyi.atool.localhost`)"
+      - "traefik.http.routers.ruoyi-gateway.entrypoints=web"
+      - “traefik.http.routers.ruoyi-gateway.service=ruoyi-gateway”
+      - "traefik.http.services.ruoyi-gateway.loadbalancer.server.port=8080"
 
   ruoyi-auth:
     container_name: ruoyi-auth
