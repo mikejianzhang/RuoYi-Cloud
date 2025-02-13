@@ -162,7 +162,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.ruoyi-nginx.rule=Host(`ruoyi.atool.localhost`)"
-      - "traefik.http.routers.ruoyi-nginx.rule=PathPrefix(`/`)"
       - "traefik.http.routers.ruoyi-nginx.entrypoints=web"
       - “traefik.http.routers.ruoyi-nginx.service=ruoyi-nginx”
       - "traefik.http.services.ruoyi-nginx.loadbalancer.server.port=80"

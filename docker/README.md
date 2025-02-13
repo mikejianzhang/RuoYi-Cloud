@@ -4,6 +4,9 @@
 export DOCKER_BUILDKIT=0
 docker-compose up -d
 ```
+## RuoYi
+
+> Default account: admin/admin123  
 
 ## Sentinel
 + Build image  
@@ -21,12 +24,11 @@ docker-compose up -d
 
 > https://sentinelguard.io/zh-cn/docs/introduction.html  
 
-## RuoYi
+## Nacos
 
-> Default account: admin/admin123  
+> No password  
 
-
-### Monitor
+## Monitor
 
 > Default account: ruoyi/123456  
 
